@@ -32,30 +32,45 @@ vector<AreaLivre> InicializarList(){
     return HeapLivre;
 }
 
+vector<AreaLivre> AtualizarLista(vector<Heap> heap){
+    int i,j;
+    vector<AreaLivre> temp;
+    for(i=0;i<size(heap);i++){
+        if(heap[i].vazio){
+            for(j=i;j<size(heap);j++){
+                if(!heap[j].vazio){
+                    break;
+                }
+            }
+            struct AreaLivre temp2{i,j-i};
+            temp.push_back(temp2);
+            i = j;
+        }
+    }
+    return temp;
+}
+
 void FirstFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre, int tam,char nome){
     bool entrou = false;
     // Percorrer a Lista de Area Livre
-    for(int i =0;i<size(HeapLivre);i++){
+    for(int i =0;i<HeapLivre.size();i++){
         // Verificar se exite na Lista uma sequência de blocos que corresponde com o tamanho da nova inserção
         if(HeapLivre[i].qtd >= tam){
             entrou = true;
             struct AreaLivre a = HeapLivre[i];
             // Alterar o heap
-            for(int j = a.endereco;j<tam;j++){
+            for(int j = a.endereco;j<a.endereco + tam;j++){
                 struct Heap b{false,nome};
                 heap[j] = b;
             }
             // Alterar a lista de Area Livre
-            a.endereco = a.endereco + tam;
-            a.qtd = a.qtd - tam;
-            HeapLivre[i] = a;
+            HeapLivre = AtualizarLista(heap);
             break;
         }
     }
     if(!entrou){
         cout << "Não foi encontrado nenhum espaço Livre no Heap" << endl;
     }
-
 }
 
 void ChamarFirstFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre){
@@ -68,6 +83,30 @@ void ChamarFirstFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre){
     cin >> tam;
     cout << endl;
     FirstFit(heap,HeapLivre,tam,nome);
+}
+
+
+
+void Deletar(vector<Heap>& heap,vector<AreaLivre>& HeapLivre,char nome) {
+    bool achou = false;
+    for(int i =0;i<size(heap);i++){
+        if(nome == heap[i].nome){
+            achou = true;
+            struct Heap temp{true};
+            heap[i] = temp;
+        }
+    }
+    if(achou)
+        HeapLivre = AtualizarLista(heap);
+    else
+        cout << "ID nao encontrado" << endl;
+}
+
+void ChamarDeletar(vector<Heap>& heap, vector<AreaLivre>& HeapLivre){
+    char nome;
+    cout << "Digite o ID: ";
+    cin >> nome;
+    Deletar(heap,HeapLivre,nome);
 }
 
 void PrintaHeap(vector<Heap> heap){
@@ -95,9 +134,10 @@ void imprimirMenu() {
     cout << "MENU" << endl;
     cout << "1 - Inserir Fist-Fit" << endl;
     cout << "2 - Inserir Next-Fit" << endl;
-    cout << "3 - Printar o Heap" << endl;
-    cout << "4 - Printar a Lista de Areas Livres" << endl;
-    cout << "5 - Encerrar o programa" << endl;
+    cout << "3 - Deletar" << endl;
+    cout << "4 - Printar o Heap" << endl;
+    cout << "5 - Printar a Lista de Areas Livres" << endl;
+    cout << "6 - Encerrar o programa" << endl;
     cout << "Digite a opcao desejada: ";
 }
 
@@ -118,18 +158,21 @@ int main(){
 
                 break;
             case 3:
-                PrintaHeap(heap);
+                ChamarDeletar(heap,HeapLivre);
                 break;
             case 4:
-                PrintaLista(HeapLivre);
+                PrintaHeap(heap);
                 break;
             case 5:
+                PrintaLista(HeapLivre);
+                break;
+            case 6:
                 cout << "Programa encerrado." << endl;
                 break;
             default:
                 cout << "Opcao invalida. Digite novamente." << endl;
         }
         cout << endl;
-    }while(opcao != 5);
+    }while(opcao != 6);
     return 0;
 }

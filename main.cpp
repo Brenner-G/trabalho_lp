@@ -10,7 +10,7 @@ struct Heap{
     bool vazio; //true = posição vazia, false = posição ocupada
     char nome; // id da memória
 };
-// Estrutura para representar cada nó da lista de áreas livres
+
 struct AreaLivre{
     int endereco;   // Endereço inicial da área livre no heap
     int qtd;    // Quantidade de blocos livres contíguos da área
@@ -25,7 +25,7 @@ vector<Heap> InicializarHeap(){
     return heap;
 }
 
-vector<AreaLivre> InicializarList(){
+vector<AreaLivre> InicializarLista(){
     struct AreaLivre a{0,TAM + 1};
     vector<AreaLivre> HeapLivre;
     HeapLivre.push_back(a);
@@ -35,9 +35,9 @@ vector<AreaLivre> InicializarList(){
 vector<AreaLivre> AtualizarLista(vector<Heap> heap){
     int i,j;
     vector<AreaLivre> temp;
-    for(i=0;i<size(heap);i++){
+    for(i=0;i<heap.size();i++){
         if(heap[i].vazio){
-            for(j=i;j<size(heap);j++){
+            for(j=i;j<heap.size();j++){
                 if(!heap[j].vazio){
                     break;
                 }
@@ -50,6 +50,13 @@ vector<AreaLivre> AtualizarLista(vector<Heap> heap){
     return temp;
 }
 
+void AlteraHeap(struct AreaLivre temp,vector<Heap>& heap,char nome, int tam){
+    for(int j = temp.endereco;j<temp.endereco + tam;j++){
+        struct Heap b{false,nome};
+        heap[j] = b;
+    }
+}
+
 void FirstFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre, int tam,char nome){
     bool entrou = false;
     // Percorrer a Lista de Area Livre
@@ -57,12 +64,8 @@ void FirstFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre, int tam,char nom
         // Verificar se exite na Lista uma sequência de blocos que corresponde com o tamanho da nova inserção
         if(HeapLivre[i].qtd >= tam){
             entrou = true;
-            struct AreaLivre a = HeapLivre[i];
-            // Alterar o heap
-            for(int j = a.endereco;j<a.endereco + tam;j++){
-                struct Heap b{false,nome};
-                heap[j] = b;
-            }
+            // Alterar o Heap
+            AlteraHeap(HeapLivre[i],heap,nome,tam);
             // Alterar a lista de Area Livre
             HeapLivre = AtualizarLista(heap);
             break;
@@ -73,7 +76,35 @@ void FirstFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre, int tam,char nom
     }
 }
 
-void ChamarFirstFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre){
+void BestFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre, int tam, char nome) {
+    bool entrou = false;
+    int dif = TAM + 1; // Inicializa com um valor maior do que qualquer diferença possível
+    struct AreaLivre temp{};
+    // Percorrer a Lista de Área Livre
+    for(auto & i : HeapLivre){
+        // Verificar se existe na Lista uma sequência de blocos que corresponde ao tamanho da nova inserção
+        if (i.qtd >= tam) {
+            entrou = true;
+            int novaDif = i.qtd - tam;
+            if (novaDif < dif){
+                dif = novaDif;
+                temp = i;
+            }
+        }
+    }
+    if(entrou){
+        // Alterar o Heap
+        AlteraHeap(temp, heap, nome, tam);
+        // Alterar a lista de Área Livre
+        HeapLivre = AtualizarLista(heap);
+    }
+    else {
+        cout << "Não foi encontrado nenhum espaço livre no Heap" << endl;
+    }
+}
+
+
+void Alocar(vector<Heap>& heap, vector<AreaLivre>& HeapLivre,bool ff){
     char nome;
     int tam;
     cout << "Digite o ID: ";
@@ -82,10 +113,11 @@ void ChamarFirstFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre){
     cout << "Digite o tamanho: ";
     cin >> tam;
     cout << endl;
-    FirstFit(heap,HeapLivre,tam,nome);
+    if(ff)
+        FirstFit(heap,HeapLivre,tam,nome);
+    else
+        BestFit(heap,HeapLivre,tam,nome);
 }
-
-
 
 void Deletar(vector<Heap>& heap,vector<AreaLivre>& HeapLivre,char nome) {
     bool achou = false;
@@ -133,7 +165,7 @@ void PrintaLista(vector<AreaLivre> HeapLivre){
 void imprimirMenu() {
     cout << "MENU" << endl;
     cout << "1 - Inserir Fist-Fit" << endl;
-    cout << "2 - Inserir Next-Fit" << endl;
+    cout << "2 - Inserir Best-Fit" << endl;
     cout << "3 - Deletar" << endl;
     cout << "4 - Printar o Heap" << endl;
     cout << "5 - Printar a Lista de Areas Livres" << endl;
@@ -143,7 +175,7 @@ void imprimirMenu() {
 
 int main(){
     vector<Heap> heap = InicializarHeap(); //vetor que simula o heap com TAM de tamanho
-    vector<AreaLivre> HeapLivre = InicializarList();
+    vector<AreaLivre> HeapLivre = InicializarLista();
     int opcao;
     do{
         imprimirMenu();
@@ -152,10 +184,10 @@ int main(){
 
         switch(opcao){
             case 1:
-                ChamarFirstFit(heap,HeapLivre);
+                Alocar(heap,HeapLivre,true);
                 break;
             case 2:
-
+                Alocar(heap,HeapLivre,false);
                 break;
             case 3:
                 ChamarDeletar(heap,HeapLivre);

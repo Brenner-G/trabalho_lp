@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <list>
 
 #define TAM 20
 
@@ -26,7 +25,7 @@ vector<Heap> InicializarHeap(){
 }
 
 vector<AreaLivre> InicializarLista(){
-    struct AreaLivre a{0,TAM + 1};
+    struct AreaLivre a{0,TAM};
     vector<AreaLivre> HeapLivre;
     HeapLivre.push_back(a);
     return HeapLivre;
@@ -37,7 +36,7 @@ vector<AreaLivre> AtualizarLista(vector<Heap> heap){
     vector<AreaLivre> temp;
     for(i=0;i<heap.size();i++){
         if(heap[i].vazio){
-            for(j=i;j<heap.size();j++){
+            for(j=i;j < heap.size() - 1;j++){
                 if(!heap[j].vazio){
                     break;
                 }
@@ -51,7 +50,7 @@ vector<AreaLivre> AtualizarLista(vector<Heap> heap){
 }
 
 void AlteraHeap(struct AreaLivre temp,vector<Heap>& heap,char nome, int tam){
-    for(int j = temp.endereco;j<temp.endereco + tam;j++){
+    for(int j = temp.endereco;j<temp.endereco + tam - 1;j++){
         struct Heap b{false,nome};
         heap[j] = b;
     }
@@ -121,11 +120,11 @@ void Alocar(vector<Heap>& heap, vector<AreaLivre>& HeapLivre,bool ff){
 
 void Deletar(vector<Heap>& heap,vector<AreaLivre>& HeapLivre,char nome) {
     bool achou = false;
-    for(int i =0;i<size(heap);i++){
-        if(nome == heap[i].nome){
+    for(auto & i : heap){
+        if(nome == i.nome){
             achou = true;
             struct Heap temp{true};
-            heap[i] = temp;
+            i = temp;
         }
     }
     if(achou)
@@ -141,13 +140,13 @@ void ChamarDeletar(vector<Heap>& heap, vector<AreaLivre>& HeapLivre){
     Deletar(heap,HeapLivre,nome);
 }
 
-void PrintaHeap(vector<Heap> heap){
-    for(int i = 0; i < size(heap);i++){
-        if(heap[i].vazio){
+void PrintaHeap(const vector<Heap>& heap){
+    for(auto & i : heap){
+        if(i.vazio){
             cout << " ";
         }
         else{
-            cout << heap[i].nome << " ";
+            cout << i.nome << " ";
         }
         cout << "|";
     }
@@ -155,9 +154,9 @@ void PrintaHeap(vector<Heap> heap){
 
 }
 
-void PrintaLista(vector<AreaLivre> HeapLivre){
-    for(int i = 0; i < size(HeapLivre);i++){
-        cout << HeapLivre[i].endereco << "|" << HeapLivre[i].qtd << "--> ";
+void PrintaLista(const vector<AreaLivre>& HeapLivre){
+    for(auto & i : HeapLivre){
+        cout << i.endereco << "|" << i.qtd << "--> ";
     }
     cout << endl;
 }

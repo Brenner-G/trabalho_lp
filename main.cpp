@@ -50,7 +50,7 @@ vector<AreaLivre> AtualizarLista(vector<Heap> heap){
 }
 
 void AlteraHeap(struct AreaLivre temp,vector<Heap>& heap,char nome, int tam){
-    for(int j = temp.endereco;j<temp.endereco + tam - 1;j++){
+    for(int j = temp.endereco;j<temp.endereco + tam;j++){
         struct Heap b{false,nome};
         heap[j] = b;
     }
@@ -82,9 +82,11 @@ void BestFit(vector<Heap>& heap, vector<AreaLivre>& HeapLivre, int tam, char nom
     // Percorrer a Lista de Área Livre
     for(auto & i : HeapLivre){
         // Verificar se existe na Lista uma sequência de blocos que corresponde ao tamanho da nova inserção
-        if (i.qtd >= tam) {
+        if (i.qtd >= tam){
             entrou = true;
             int novaDif = i.qtd - tam;
+            if(novaDif == 0)
+                temp = i;
             if (novaDif < dif){
                 dif = novaDif;
                 temp = i;
